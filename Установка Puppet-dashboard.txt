@@ -1,0 +1,51 @@
+# Установка Puppet-dashboard #
++++++++++++++++++++++++++++++
+
+#  Установка MySQL-server
+yum install mysql-server mysql mysql-devel
+/etc/init.d/mysqld start
+/sbin/chkconfig mysqld on
+yum install readline-devel
+mysql_secure_installation
+
+# Установка Apache
+yum install httpd mod_ssl httpd-devel
+/sbin/chkconfig httpd on
+/etc/init.d/httpd start
+
+# Установка модуля passenger для Апача
+yum install curl-devel -y
+gem update
+gem install passenger
+passenger-install-apache2-module
+#  Жмак на энтер, много-много букоф... чувствую себя хацкером :Ъ
+
+# Добавляем в /etc/httpd/conf/httpd.conf ( у нас уже с руби 1.9.3 ) :
+nano /etc/httpd/conf/httpd.conf
+LoadModule passenger_module /usr/local/rvm/gems/ruby-1.9.3-p448/gems/passenger-4.0.21/buildout/apache2/mod_passenger.so
+   PassengerRoot /usr/local/rvm/gems/ruby-1.9.3-p448/gems/passenger-4.0.21
+   PassengerDefaultRuby /usr/local/rvm/wrappers/ruby-1.9.3-p448/ruby
+
+# Виртуальный хост:
+ <VirtualHost *:80>
+      ServerName server.com
+      # !!! Be sure to point DocumentRoot to 'public'!
+      DocumentRoot /usr/share/puppet-dashboard/public    
+      <Directory /usr/share/puppet-dashboard/public>
+         # This relaxes Apache security settings.
+         AllowOverride all
+         # MultiViews must be turned off.
+         Options -MultiViews
+      </Directory>
+   </VirtualHost>
+
+# Меняем пользователя с apache на puppet-dashboard
+sed -i 's/User apache/User puppet-dashboard/g' /etc/httpd/conf/httpd.conf
+sed -i 's/Group apache/Group puppet-dashboard/g' /etc/httpd/conf/httpd.conf
+
+# Перезагружаем сервер.
+service httpd restart
+
+Но рано радоваться. Мы не настроили Rails приложение.
+Продолжение в доке rails.txt
+
