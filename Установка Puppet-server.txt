@@ -5,10 +5,40 @@
 rpm -ihv http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
 
 # Устанавливаем необходимые пакеты:
-yum install puppet-server puppet-dashboard y
+yum install -y puppet-server puppet-dashboard gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison glibc
 
 # При этом подтянулись следующие пакеты:
 augeas-libs facter hiera libselinux-ruby pciutils puppet ruby-augeas ruby-irb ruby-mysql ruby-rdoc ruby-rgen  ruby-shadow rubygem-json rubygem-rake rubygems virt-what
 
 # Устанавливаем пакет rails:
 gem install rails
+
+# Возникает ошибка:
+Building native extensions.  This could take a while...
+ERROR:  Error installing atomic:
+    ERROR: Failed to build gem native extension.
+
+/usr/bin/ruby extconf.rb
+mkmf.rb can't find header files for ruby at /usr/lib/ruby/ruby.h
+
+
+Gem files will remain installed in /usr/lib/ruby/gems/1.8/gems/atomic-1.1.14 for inspection.
+Results logged to /usr/lib/ruby/gems/1.8/gems/atomic-1.1.14/ext/gem_make.out
+
+# ПРоблему можно устранить обновив гемы и доки и установив ruby-devel:
+yum install ruby-rdoc ruby-devel -y
+gem update
+gem update --system
+
+# Но возникает следующая проблема:
+gem install rails
+Building native extensions.  This could take a while...
+Successfully installed atomic-1.1.14
+Fetching: thread_safe-0.1.3.gem (100%)
+Successfully installed thread_safe-0.1.3
+Fetching: activesupport-4.0.0.gem (100%)
+ERROR:  Error installing rails:
+    activesupport requires Ruby version >= 1.9.3.
+
+Т.к. в стандартных репозитоиях нет Ruby >= 1.9.3, прийдется ставить из сорцов (rvm)
+
