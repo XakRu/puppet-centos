@@ -82,9 +82,25 @@ rvm rubygems current
 # Добавляем рута и пользователей (которые будут иметь доступ к rvm) в группу rvm:
 usermod -aG rvm root 
 
-Так как пакеты puppet-server и puppet-dashboard у нас удалились после удаления ruby-1.8.7, установим их снова.
+# Так как пакеты puppet-server и puppet-dashboard у нас удалились после удаления ruby-1.8.7, установим их снова.
 yum install -y puppet-server puppet-dashboard 
-Можно не удаляя ruby-1.8.7 установить RVM ruby-1.9.3
+# Можно не удаляя ruby-1.8.7 установить RVM ruby-1.9.3
+
+# Добавляем puppet-dashboard в группу rvm:
+usermod -aG rvm puppet-dashboard
+
+# Изменяем переенные в /etc/sysconfig/puppet-dashboard -
+# DASHBOARD_RUBY=/usr/bin/ruby => DASHBOARD_RUBY=/usr/local/rvm/rubies/ruby-1.9.3-p448/bin/ruby
+sed -i 's/DASHBOARD_RUBY=\/usr\/bin\/ruby/DASHBOARD_RUBY=\/usr\/local\/rvm\/rubies\/ruby-1.9.3-p448\/bin\/ruby/g' /etc/sysconfig/puppet-dashboard
+Не уверен что нам эта настройка нужна, т.к. у нас будет apache-mod_passenger
+
+# Перейдите к настройке клиента, после пункта запуска демона на клиенте выполните следующую команду на сервере:
+puppet cert --list
+# Вывод комманды должен быть примерно следующим:
+	"alone.com" (MD5) E5:2B:F8:1B:DE:21:1B:62:78:82:07:FC:00:E0:99:D9
+# Говорит о том, какой сервер ждет от нас сертификата. Давайте его подпишем:
+puppet cert sign alone.com
+
 
 
 
