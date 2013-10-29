@@ -1,29 +1,7 @@
-Подключенние репозитория:
+# Подключенние репозитория puppetlabs:
 rpm -ihv http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
 
-Установка руби 1.9.3 используя rvm. RVM хорош тем, что он устанавливает пакет без Rdoc, что существенно сокращает время установки софта, по желанию можно установить и рдок. Также можно определить - кому будет доступен руби, управлять несколькими версиями руби на сервере. Собирется из сорцов. С моей стороны проблем не обнаружено. 
-curl -L get.rvm.io | bash -s stable
-
-  * Пользователи, которые будут пользоваться ruby/rvm необходимо добавить в группу 'rvm',
-   Они должны перелогиниться, для них будут доступны команды и переменные ruby `umask u=rwx,g=rwx,o=rx`.
-
-  * Для рута необходимо выполнить команду `source /etc/profile.d/rvm.sh` перед использованием руби. Для загрузки переменных и новых команд.
-
-#In order to work, RVM has some of its own dependancies that need to be installed. You can see what these are:
-rvm requirements
-
-Если чего-то не хватает, то установить эту пачку:
-rvmsudo yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison glibc
-
-# Устанавливаем руби 1.9.3:
-rvm install 1.9.3
-
-Назначем его по умолчанию:
-rvm use 1.9.3 --default
-
-Устанавливаем необходимые гемы ( обновляем )
-rvm rubygems current
-
+Устанавливаем ruby  из стандартного репозитория (версия 1.8.7)
 Устанавливаем на сервере rails ( на нем работает папет дашбоард)
 gem install rails
 
