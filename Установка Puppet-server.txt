@@ -78,6 +78,8 @@ rvm use 1.9.3 --default
 
 Устанавливаем необходимые гемы ( обновляем )
 rvm rubygems current
+gem update --system 1.8.25
+gem install rails
 
 # Добавляем рута и пользователей (которые будут иметь доступ к rvm) в группу rvm:
 usermod -aG rvm root 
@@ -100,7 +102,11 @@ puppet cert --list
 	"alone.com" (MD5) E5:2B:F8:1B:DE:21:1B:62:78:82:07:FC:00:E0:99:D9
 # Говорит о том, какой сервер ждет от нас сертификата. Давайте его подпишем:
 puppet cert sign alone.com
+# Вывод примерно следующий:
+Notice: Signed certificate request for alone.com
+Notice: Removing file Puppet::SSL::CertificateRequest alone.com at '/var/lib/puppet/ssl/ca/requests/alone.com.pem'
 
+Далее установка Puppet-dashboard.txt
 
 
 

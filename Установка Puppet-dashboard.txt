@@ -46,6 +46,3 @@ sed -i 's/Group apache/Group puppet-dashboard/g' /etc/httpd/conf/httpd.conf
 # Перезагружаем сервер.
 service httpd restart
 
-Но рано радоваться. Мы не настроили Rails приложение.
-Продолжение в доке rails.txt
-
