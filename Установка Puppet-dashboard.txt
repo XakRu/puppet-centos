@@ -7,6 +7,23 @@ yum install mysql-server mysql mysql-devel
 /sbin/chkconfig mysqld on
 yum install readline-devel
 mysql_secure_installation
+gem install mysql
+
+# Настройка подключения к БД  ( puppet ) config/database.yml:
+CREATE DATABASE dashboard CHARACTER SET utf8;
+CREATE USER 'dashboard'@'localhost' IDENTIFIED BY 'my_password';
+GRANT ALL PRIVILEGES ON dashboard.* TO 'dashboard'@'localhost';
+flush privileges;
+
+# Установить пераметр для MySQL:
+mysql> set max_allowed_packet = 33554432;
+# или 
+max_allowed_packet = 32M в /etc/my.cnf
+service mysqld restart
+
+# Переходим в папку с pappet-dashboard где находится скирпт импорта таблиц и запускаем:
+cd /usr/share/puppet-dashboard/
+rake RAILS_ENV=production db:migrate
 
 # Установка Apache
 yum install httpd mod_ssl httpd-devel
