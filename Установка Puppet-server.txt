@@ -1,0 +1,14 @@
+# Установка Puppet-server #
++++++++++++++++++++++++++++
+
+# Добавляем репозиторий puppet-labs:
+rpm -ihv http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
+
+# Устанавливаем необходимые пакеты:
+yum install puppet-server puppet-dashboard y
+
+# При этом подтянулись следующие пакеты:
+augeas-libs facter hiera libselinux-ruby pciutils puppet ruby-augeas ruby-irb ruby-mysql ruby-rdoc ruby-rgen  ruby-shadow rubygem-json rubygem-rake rubygems virt-what
+
+# Устанавливаем пакет rails:
+gem install rails
