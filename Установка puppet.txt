@@ -1,0 +1,122 @@
+Подключенние репозитория:
+rpm -ihv http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
+
+Установка руби 1.9.3 используя rvm. RVM хорош тем, что он устанавливает пакет без Rdoc, что существенно сокращает время установки софта, по желанию можно установить и рдок. Также можно определить - кому будет доступен руби, управлять несколькими версиями руби на сервере. Собирется из сорцов. С моей стороны проблем не обнаружено. 
+curl -L get.rvm.io | bash -s stable
+
+  * Пользователи, которые будут пользоваться ruby/rvm необходимо добавить в группу 'rvm',
+   Они должны перелогиниться, для них будут доступны команды и переменные ruby `umask u=rwx,g=rwx,o=rx`.
+
+  * Для рута необходимо выполнить команду `source /etc/profile.d/rvm.sh` перед использованием руби. Для загрузки переменных и новых команд.
+
+#In order to work, RVM has some of its own dependancies that need to be installed. You can see what these are:
+rvm requirements
+
+Если чего-то не хватает, то установить эту пачку:
+rvmsudo yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison glibc
+
+# Устанавливаем руби 1.9.3:
+rvm install 1.9.3
+
+Назначем его по умолчанию:
+rvm use 1.9.3 --default
+
+Устанавливаем необходимые гемы ( обновляем )
+rvm rubygems current
+
+Устанавливаем на сервере rails ( на нем работает папет дашбоард)
+gem install rails
+
+Установка pupet-master:
+yum install puppet-server -y
+
+Установка клиентов:
+yum install puppet -y
+
+ДОбавляем пользователя puppet в группу rvm для доступа к руби 1.9.3
+usermod -aG rvm puppet
+usermod -aG rvm root
+
+Необходимо указать мастер-сервер в конфигурациях:
+[main]
+    logdir = /var/log/puppet
+    rundir = /var/run/puppet
+    ssldir = $vardir/ssl
+	
+	server = server.com
+	report = true
+	pluginsync = true
+	cetname = first.com
+И т.д.
+
+После настройки ролей и hosts файла необходимо перезагрузить все сервисы puppet.
+Клиенты автоматом ждут подписи сертификата от сервера.
+Проверить мы можем это командой:
+puppet cert list
+	"first.com"  (SHA256) 4F:5E:79:42:20:94:4D:94:91:88:FC:7A:CB:6F:8E:8A:B4:3B:DA:2F:94:C9:D6:14:49:1A:17:6E:11:4F:CF:4A
+  	"second.com" (SHA256) 78:5D:86:0B:62:9E:8F:0C:D7:9D:7B:FB:04:C2:5D:58:06:2B:A0:30:03:67:48:E3:81:5A:42:17:BB:24:A7:E4
+  	"third.com"  (SHA256) CC:08:60:4A:A7:CB:0B:88:DF:4C:D1:91:92:C2:DC:A4:78:93:46:7C:C6:31:2C:60:F9:71:24:05:64:10:9E:88
+
+Подпишем сертификаты:
+puppet cert sign --all
+	Notice: Signed certificate request for first.com
+	Notice: Removing file Puppet::SSL::CertificateRequest first.com at '/var/lib/puppet/ssl/ca/requests/first.com.pem'
+	Notice: Signed certificate request for second.com
+	Notice: Removing file Puppet::SSL::CertificateRequest second.com at '/var/lib/puppet/ssl/ca/requests/second.com.pem'
+	Notice: Signed certificate request for third.com
+	Notice: Removing file Puppet::SSL::CertificateRequest third.com at '/var/lib/puppet/ssl/ca/requests/third.com.pem'
+
+Проверим:
+puppet cert list --all
+	+ "first.com"  (SHA256) EF:61:0F:F6:58:2E:80:76:E7:71:0D:D0:70:53:18:03:34:7B:6F:D1:EE:49:2B:01:F3:21:3A:95:86:DD:18:74
+	+ "second.com" (SHA256) 53:A5:F0:D9:C3:0A:79:0A:B9:1F:38:08:0B:49:B1:32:09:C8:54:1E:0B:6B:4C:AE:C8:47:DB:B2:F0:7C:81:F7
+	+ "server"     (SHA256) EB:AB:D5:37:FB:E8:C5:0C:13:7C:C1:09:51:E6:0A:83:8D:70:A5:0F:7A:15:A4:E4:3C:1E:85:BC:B8:B9:2F:64
+	+ "third.com"  (SHA256) EA:B0:E4:59:31:88:DC:EB:1F:20:F3:A4:0E:10:33:AB:CC:54:9C:6E:6D:EB:02:50:24:C9:70:62:47:72:6F:83
+
+О, даже себя подписали.
+
+yum insall mysql-devel mysql-server postgresql-devel -y
+
+Теперь установка passenger:
+gem install passenger 
+rvm passenger-install-nginx-module
+
+устанавливаем вебморду: 
+yum install puppet-dashboard
+usermod -aG rvm puppet-dashboard
+
+Указыаем в конфах - что бы nginx работал под пользователем puppet-dashboard
+( дока http://www.modrails.com/documentation/Users%20guide%20Nginx.html#_installing_or_upgrading_on_red_hat_fedora_centos_or_scientificlinux)
+rpm --import http://passenger.stealthymonkeys.com/RPM-GPG-KEY-stealthymonkeys.asc
+yum install http://passenger.stealthymonkeys.com/rhel/6/passenger-release.noarch.rpm
+
+yum install nginx-passenger
+Идем в БД:
+CREATE DATABASE dashboard CHARACTER SET utf8;
+CREATE USER 'dashboard'@'localhost' IDENTIFIED BY 'my_password';
+GRANT ALL PRIVILEGES ON dashboard.* TO 'dashboard'@'localhost';
+Выход:!
+
+Теперь настраиваем /var/www/html/config/database.yml
+прописываем данные к БД в продакшн.
+
+Добавляем в mysql в секцию [mysqld] параметр:
+max_allowed_packet = 32M
+
+Нужно применить патч:
+gem update --system 1.8.25
+
+Создаем таблицы в БД для продакшн:
+rake RAILS_ENV=production db:migrate
+
+Возможны непонятные ошибки, позже разберусь.
+
+
+
+
+
+
+
+
+
+
