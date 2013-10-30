@@ -1,6 +1,6 @@
 Установка puppet | master
 
-server > yum install puppet-server -y
+server > yum install puppet-server readline-devel -y
 
 
 client > yum install puppet
@@ -15,4 +15,91 @@ server > puppet cert --list --all
 
 И можно сразу подписать:
 server > puppet cert sign <host>
+
+Ноды описываются на сервере в файле /etc/puppet/manifests/nodes.pp
+Примерно так:
+# cat nodes.pp
+ node 'agent01.com' {
+   include httpd
+}
+
+ node 'agent02.com' {
+   include httpd
+}
+
+Рецепты:
+# cat /etc/puppet/manifests/site.pp 
+class httpd { 
+        package { 'httpd':
+                ensure => installed,
+                }
+
+        service { 'httpd':
+                ensure => true,
+                enable => true,
+                require => Package['httpd'],
+                }
+}
+
+
+
+Устанавливаем MySQL-server:
+yum install mysql-server mysql-devel -y
+Настраиваем БД:
+nano /etc/my.cnf
+[mysqld]
+max_allowed_packet = 32M
+
+Запускам MySQL:
+/etc/init.d/mysqld start
+
+В автозагрузку:
+/sbin/chkconfig mysqld on
+yum install readline-devel
+
+mysql_secure_installation ..... далее отвечаем на вопросы......
+
+
+# Создание подключения к БД  ( puppet-server ) config/database.yml:
+CREATE DATABASE dashboard CHARACTER SET utf8;
+CREATE USER 'dashboard'@'localhost' IDENTIFIED BY 'my_password';
+GRANT ALL PRIVILEGES ON dashboard.* TO 'dashboard'@'localhost';
+flush privileges;
+
+
+Блядь, нахуй, не нужно устанавливать gem rails, он нах*й не нужен этот гем!!!
+Подключаем репозиторий puppet-labs, потомучто вебморды нет в стандартной репе епелевской:
+rpm -ihv http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
+
+Устанавливаем puppet-dashboard, там и зависимости подцепятся:
+yum install puppet-dashboard -y
+
+Обновляем гемы:
+gem update
+cd /usr/share/puppet-dashboard/
+rake gems:refresh_specs
+
+Настраиваем подключение к БД:
+cd /usr/share/puppet-dashboard/config/
+nano database.yml
+
+yum install build-essential irb libmysql-ruby libmysqlclient-dev    libopenssl-ruby libreadline-ruby mysql-server rake rdoc ri ruby ruby-devel
+
+
+
+/etc/init.d/puppet-dashboard start
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
