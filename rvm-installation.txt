@@ -1,0 +1,7 @@
+rpm -ihv http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
+curl -L get.rvm.io | bash -s stable
+source /etc/profile.d/rvm.sh
+rvm requirements
+rvm install 1.9.3
+rvm use 1.9.3 --default
+rvm rubygems current

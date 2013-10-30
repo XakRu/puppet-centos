@@ -23,8 +23,8 @@ usermod -aG rvm root
 	
 	server = server.com
 	report = true
-	pluginsync = true
-	cetname = first.com
+	#pluginsync = true
+	certname = first.com
 И т.д.
 
 После настройки ролей и hosts файла необходимо перезагрузить все сервисы puppet.

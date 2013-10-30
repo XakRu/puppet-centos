@@ -23,6 +23,7 @@ service mysqld restart
 
 # Переходим в папку с pappet-dashboard где находится скирпт импорта таблиц и запускаем:
 cd /usr/share/puppet-dashboard/
+rake gems:refresh_specs
 rake RAILS_ENV=production db:migrate
 
 # Установка Apache
