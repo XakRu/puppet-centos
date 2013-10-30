@@ -1,0 +1,18 @@
+Установка puppet | master
+
+server > yum install puppet-server -y
+
+
+client > yum install puppet
+
+client > В блок [agent] файла /etc/puppet/puppet.conf вставить:
+server = server2.com
+report = true   
+
+ОТкрыть порт 8140 на обоих серверах.
+После перезапуска агента сервер уже видит его запрос.
+server > puppet cert --list --all
+
+И можно сразу подписать:
+server > puppet cert sign <host>
+
