@@ -1,0 +1,63 @@
+Установка PuppetDB
+[root@server2 puppet-dashboard]# puppet resource package puppetdb ensure=latest
+Notice: /Package[puppetdb]/ensure: created
+package { 'puppetdb':
+  ensure => '1.5.2-1.el6',
+}
+
+Перед запуском необходимо отключить ipv6, иначе он конкатенирует две версии протокола в одну строку вида:
+tcp        0      0 ::ffff:127.0.0.1:8080       :::*                        LISTEN      16746/java          
+tcp        0      0 ::ffff:130.193.69.71:8081   :::*                        LISTEN      16746/java
+
+[root@server2 puppet-dashboard]# echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+[root@server2 puppet-dashboard]# echo 1 > /proc/sys/net/ipv6/conf/default/disable_ipv6
+или
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+
+service network restart
+
+# Запускаем puppetdb
+[root@server2 puppet-dashboard]# puppet resource service puppetdb ensure=running enable=true
+Notice: /Service[puppetdb]/ensure: ensure changed 'stopped' to 'running'
+service { 'puppetdb':
+  ensure => 'running',
+  enable => 'true',
+}
+
+через инит не запускается puppetdb!!!!
+
+Создаем конф /etc/puppet/puppetdb.conf 
+[main]
+server = server2.com
+port = 8081
+
+Изменяем конф /etc/puppet/puppet.conf , добавив вконце  директивы [master]
+ storeconfigs = true
+ storeconfigs_backend = puppetdb
+ 
+ Необходимо найти - где паппет ищет  /etc/puppet/routes.yaml
+ puppet master --configprint route_file
+ /etc/puppet/routes.yaml
+ 
+ 
+ Создаем файл /etc/puppet/routes.yaml с содержимым:
+ master:
+   facts:
+      terminus: puppetdb
+      cache: yaml
+
+ /etc/init.d/puppetmaster restart
+ 
+ Добавляем в вебку:
+http://docs.puppetlabs.com/guides/inventory_service.html 
+/etc/puppet/auth.conf
+path /facts
+auth any
+method find, search
+allow *
+
+
+
+ 
+ 
