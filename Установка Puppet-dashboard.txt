@@ -1,13 +1,34 @@
 # Установка Puppet-dashboard #
 +++++++++++++++++++++++++++++
+yum install puppet-dashboard
 
+Dependencies Resolved
+
+===========================================================================================================================================================================================
+ Package                                        Arch                                 Version                                       Repository                                         Size
+===========================================================================================================================================================================================
+Installing:
+ puppet-dashboard                               noarch                               1.2.23-1.el6                                  puppetlabs-products                               4.3 M
+Installing for dependencies:
+ ruby-mysql                                     x86_64                               2.8.2-1.el6                                   epel                                               45 k
+ rubygem-rake                                   noarch                               0.8.7-2.1.el6                                 base                                              404 k
+
+Transaction Summary
+===========================================================================================================================================================================================
+Install       3 Package(s)
+
+Total download size: 4.7 M
+Installed size: 18 M
+
+
+          
 #  Установка MySQL-server
-yum install mysql-server mysql mysql-devel
+yum install mysql-server mysql mysql-devel readline-devel -y
 /etc/init.d/mysqld start
 /sbin/chkconfig mysqld on
-yum install readline-devel
 mysql_secure_installation
-gem install mysql
+yum install ruby-devel
+gem install rake mysql
 
 # Настройка подключения к БД  ( puppet ) config/database.yml:
 CREATE DATABASE dashboard CHARACTER SET utf8;
@@ -25,6 +46,18 @@ service mysqld restart
 cd /usr/share/puppet-dashboard/
 rake gems:refresh_specs
 rake RAILS_ENV=production db:migrate
+
+/etc/init.d/puppet-dashboard start
+usermod -aG puppet puppet-dashboard
+chown -R puppet-dashboard:puppet-dashboard /usr/share/puppet-dashboard/
+sudo -u puppet-dashboard rake RAILS_ENV=production reports:import
+И наконец после этой комманды отображается нода в дашборде:
+sudo -u puppet-dashboard env RAILS_ENV=production script/delayed_job -p dashboard -n 4 -m start 
+
+
+
+
+
 
 # Установка Apache
 yum install httpd mod_ssl httpd-devel
