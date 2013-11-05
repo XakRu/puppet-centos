@@ -3,7 +3,7 @@
 # alone.com ip: 192.168.0.106
 
 
-# Установка PuppetDB
+# Установка PuppetDB. Подразумевается что у вас на сервер уже подключен репозиторий puppet-labs: 
 [root@server2 puppet-dashboard]# puppet resource package puppetdb ensure=latest
 >> Notice: /Package[puppetdb]/ensure: created
 >> package { 'puppetdb':
@@ -12,7 +12,7 @@
 
 # Перед запуском необходимо отключить ipv6, иначе он конкатенирует две версии протокола в одну строку вида:
 [root@server2 puppet-dashboard]# netstat -ntlup | grep java
->> tcp        0      0 ::ffff:127.0.0.1:8080       :::*                        LISTEN      16746/java          
+>> tcp        0      0 ::ffff:127.0.0.1:8080       :::*                        LISTEN      16746/java         
 >> tcp        0      0 ::ffff:130.193.69.71:8081   :::*                        LISTEN      16746/java
 
 [root@server2 puppet-dashboard]# echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
@@ -44,21 +44,24 @@ port = 8081\n" > /etc/puppet/puppetdb.conf
  storeconfigs = true
  storeconfigs_backend = puppetdb
  
- Необходимо найти - где паппет ищет  /etc/puppet/routes.yaml
- puppet master --configprint route_file
+
+# Необходимо найти - где паппет ищет  /etc/puppet/routes.yaml
+[root@server2 puppet-dashboard]# puppet master --configprint route_file
  /etc/puppet/routes.yaml
  
- 
- # Создаем файл /etc/puppet/routes.yaml с содержимым:
+
+# Создаем файл /etc/puppet/routes.yaml с содержимым:
 [root@server2 puppet-dashboard]# echo -e "
  master:\n
    facts:\n
       terminus: puppetdb\n
       cache: yaml\n" > /etc/puppet/routes.yaml
 	  
+
 # Перезапускаем сервис паппет-мастер:
 [root@server2 puppet-dashboard]# /etc/init.d/puppetmaster restart
  
+
 # Добавляем в вебку:
 #http://docs.puppetlabs.com/guides/inventory_service.html 
 [root@server2 puppet-dashboard]# echo -e "
@@ -67,6 +70,259 @@ auth any\n
 method find, search\n
 allow *\n" >> /etc/puppet/auth.conf
 
+# Необходимо обновить ваш конфиг Puppet Dashboard settings.yml (для CentOS 6 он распологается в /usr/share/puppet-dashboard/config/settings.yml).
+# Пример конфига с пояснениями описан вконце статьи.
+# Сертификаты для Puppet Dashboard лежат в /usr/share/puppet-dashboard/certs/
 
- 
- 
+# Проверим какие клиенты подписаны, какие нет:
+[root@server2 ~]# puppet cert --list --all
+
+# Если никого нового нет, тогда переходим по следующему пути:
+[root@server2 ~]# cd /usr/share/puppet-dashboard/
+# Выполняем команду, которая генерирует сертификат для того, что бы наш 
+# Dashboard имел доступ к facts (переменным) хостов:
+[root@server2 ~]# rake cert:create_key_pair
+[root@server2 ~]# rake cert:retrieve
+
+# Если в конфиге /usr/share/puppet-dashboard/config/settings.yml указан cn_name: 'dashboard',
+# то и запрос для сертификата будет от dashboard (далее мы подписываем сертификат для dashboard)
+[root@server2 ~]# puppet cert sign dashboard
+
+
+
+
+
+# В примере использовались следующие конфигурации:
+
+################################_settings.yml_######################################
+####################################################################################
+[root@server2 ~]# cat /usr/share/puppet-dashboard/config/settings.yml
+>> #===[ Settings ]=========================================================
+>> #
+>> # This file is meant for storing setting information that is never
+>> # published or committed to a revision control system.
+>> #
+>> # Do not modify this "config/settings.yml.example" file directly -- you
+>> # should copy it to "config/settings.yml" and customize it there.
+>> #
+>> #---[ Values ]----------------------------------------------------------
+>> 
+>> # Название ноды, которая будет общаться с puppet-master сервером. Это имя
+>> # CN (common name)ноды, которое будет использоваться для сертификата Dashboard'а.
+>> # далее необходимо будет подписать сертификат по этому имени для puppet-master.
+>> cn_name: 'dashboard'
+>> 
+>> ca_crl_path: 'certs/dashboard.ca_crl.pem'
+>> 
+>> ca_certificate_path: 'certs/dashboard.ca_cert.pem'
+>> 
+>> certificate_path: 'certs/certforfacts.pem'
+>> 
+>> private_key_path: 'certs/keys/certforfacts.pem'
+>> 
+>> public_key_path: 'certs/dashboard.public_key.pem'
+>> 
+>> # Hostname of the certificate authority.
+>> # Имя сервера сертификации, в данном случае puppet-master:
+>> ca_server: 'server2.com'
+>> 
+>> # Port for the certificate authority.
+>> ca_port: 8140
+>> 
+>> # Key length for SSL certificates
+>> key_length: 1024
+>> 
+>> # The "inventory service" allows you to connect to a puppet master to retrieve and node facts
+>> # Изначально кстановлен параметр 'false', нам необходимо 'true', для отчетов о сервере.
+>> enable_inventory_service: true
+>> 
+>> # Hostname of the inventory server.
+>> # Hostname сервера инвенторизации.
+>> inventory_server: 'localhost'
+>> 
+>> # Port for the inventory server.
+>> inventory_port: 8140
+>> 
+>> # Set this to true to allow Dashboard to display diffs on files that
+>> # are archived in the file bucket.
+>> use_file_bucket_diffs: false
+>> 
+>> # Hostname of the file bucket server.
+>> file_bucket_server: 'server2.com'
+>> 
+>> # Port for the file bucket server.
+>> file_bucket_port: 8140
+>> 
+>> # Amount of time in seconds since last report before a node is considered no longer reporting
+>> no_longer_reporting_cutoff: 3600
+>> 
+>> # How many days of history to display on the "Daily Run Status" graph
+>> daily_run_history_length: 30
+>> 
+>> use_external_node_classification: true
+>> 
+>> # Uncomment the following line to set a local time zone.  Run
+>> # "rake time:zones:local" for the name of your local time zone.
+>> time_zone: 'Europe/Moscow'
+>> 
+>> # Look at http://ruby-doc.org/core/classes/Time.html#M000298 for the strftime formatting
+>> datetime_format: '%Y-%m-%d %H:%M %Z'
+>> date_format: '%A, %B %e, %Y'
+>> 
+>> # Set this to the URL of an image. The image will be scaled to the specified dimensions.
+>> custom_logo_url: '/images/dashboard_logo.png'
+>> custom_logo_width: 155px
+>> custom_logo_height: 23px
+>> custom_logo_alt_text: 'Puppet Dashboard'
+>> 
+>> # We will be deprecating using "http://dashboard_servername/reports" as the puppet master's reporturl.
+>> # Set this to 'true' once you have changed all your puppet masters to send reports to
+>> # "http://dashboard_servername/reports/upload"
+>> disable_legacy_report_upload_url: false
+>> 
+>> # Disables the UI and controller actions for editing nodes, classes, groups and reports.  Report submission is still allowed
+>> enable_read_only_mode: false
+>> 
+>> # Default number of items of each kind to display per page
+>> nodes_per_page: 20
+>> classes_per_page: 50
+>> groups_per_page: 50
+>> reports_per_page: 20
+>> 
+>> #===[ fin ]======================================================================
+################################_settings.yml_######################################
+####################################################################################
+
+
+#===================================================================================
+
+
+################################_auth.conf_#########################################
+####################################################################################
+[root@server2 ~]# cat /etc/puppet/auth.conf 
+>> # This is the default auth.conf file, which implements the default rules
+>> # used by the puppet master. (That is, the rules below will still apply
+>> # even if this file is deleted.)
+>> #
+>> # The ACLs are evaluated in top-down order. More specific stanzas should
+>> # be towards the top of the file and more general ones at the bottom;
+>> # otherwise, the general rules may "steal" requests that should be
+>> # governed by the specific rules.
+>> #
+>> # See http://docs.puppetlabs.com/guides/rest_auth_conf.html for a more complete
+>> # description of auth.conf's behavior.
+>> #
+>> # Supported syntax:
+>> # Each stanza in auth.conf starts with a path to match, followed
+>> # by optional modifiers, and finally, a series of allow or deny
+>> # directives.
+>> #
+>> # Example Stanza
+>> # ---------------------------------
+>> # path /path/to/resource     # simple prefix match
+>> # # path ~ regex             # alternately, regex match
+>> # [environment envlist]
+>> # [method methodlist]
+>> # [auth[enthicated] {yes|no|on|off|any}]
+>> # allow [host|backreference|*|regex]
+>> # deny [host|backreference|*|regex]
+>> # allow_ip [ip|cidr|ip_wildcard|*]
+>> # deny_ip [ip|cidr|ip_wildcard|*]
+>> #
+>> # The path match can either be a simple prefix match or a regular
+>> # expression. `path /file` would match both `/file_metadata` and
+>> # `/file_content`. Regex matches allow the use of backreferences
+>> # in the allow/deny directives.
+>> #
+>> # The regex syntax is the same as for Ruby regex, and captures backreferences
+>> # for use in the `allow` and `deny` lines of that stanza
+>> #
+>> # Examples:
+>> #
+>> # path ~ ^/path/to/resource    # Equivalent to `path /path/to/resource`.
+>> # allow *                      # Allow all authenticated nodes (since auth
+>> #                              # defaults to `yes`).
+>> #
+>> # path ~ ^/catalog/([^/]+)$    # Permit nodes to access their own catalog (by
+>> # allow $1                     # certname), but not any other node's catalog.
+>> #
+>> # path ~ ^/file_(metadata|content)/extra_files/  # Only allow certain nodes to
+>> # auth yes                                       # access the "extra_files"
+>> # allow /^(.+)\.example\.com$/                   # mount point; note this must
+>> # allow_ip 192.168.100.0/24                      # go ABOVE the "/file" rule,
+>> #                                                # since it is more specific.
+>> #
+>> # environment:: restrict an ACL to a comma-separated list of environments
+>> # method:: restrict an ACL to a comma-separated list of HTTP methods
+>> # auth:: restrict an ACL to an authenticated or unauthenticated request
+>> # the default when unspecified is to restrict the ACL to authenticated requests
+>> # (ie exactly as if auth yes was present).
+>> #
+>> 
+>> ### Authenticated ACLs - these rules apply only when the client
+>> ### has a valid certificate and is thus authenticated
+>> 
+>> # allow nodes to retrieve their own catalog
+>> path ~ ^/catalog/([^/]+)$
+>> method find
+>> allow $1
+>> 
+>> # allow nodes to retrieve their own node definition
+>> path ~ ^/node/([^/]+)$
+>> method find
+>> allow $1
+>> 
+>> # allow all nodes to access the certificates services
+>> path /certificate_revocation_list/ca
+>> method find
+>> allow *
+>> 
+>> # allow all nodes to store their own reports
+>> path ~ ^/report/([^/]+)$
+>> method save
+>> allow $1
+>> 
+>> # Allow all nodes to access all file services; this is necessary for
+>> # pluginsync, file serving from modules, and file serving from custom
+>> # mount points (see fileserver.conf). Note that the `/file` prefix matches
+>> # requests to both the file_metadata and file_content paths. See "Examples"
+>> # above if you need more granular access control for custom mount points.
+>> path /file
+>> allow *
+>> 
+>> ### Unauthenticated ACLs, for clients without valid certificates; authenticated
+>> ### clients can also access these paths, though they rarely need to.
+>> 
+>> # allow access to the CA certificate; unauthenticated nodes need this
+>> # in order to validate the puppet master's certificate
+>> path /certificate/ca
+>> auth any
+>> method find
+>> allow *
+>> 
+>> # allow nodes to retrieve the certificate they requested earlier
+>> path /certificate/
+>> auth any
+>> method find
+>> allow *
+>> 
+>> # allow nodes to request a new certificate
+>> path /certificate_request
+>> auth any
+>> method find, save
+>> allow *
+>> 
+>> # deny everything else; this ACL is not strictly necessary, but
+>> # illustrates the default policy.
+>> path /
+>> auth any
+>> allow *
+>> 
+>> #experimental function for some dummies people
+>> 
+>> path /facts
+>> auth any
+>> method find, search
+>> allow *
+################################_auth.conf_#########################################
+####################################################################################
