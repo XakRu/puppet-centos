@@ -1,3 +1,6 @@
+#######_Установка PuppetDB и Inventory Service with Puppet Dashboard_###############
+####################################################################################
+
 # Тестирование проводится на отдельных серверах. 
 # server2.com ip: xxx.xxx.69.71
 # alone.com ip: 192.168.0.106
@@ -31,13 +34,10 @@
 >>   enable => 'true',
 >> }
 
-# через инит puppetdb не запускается (видимо кривой скрипт)!!!!
+# через инит скрипт puppetdb не запускается (видимо кривой скрипт)!!!!
 
 # Создаем конф /etc/puppet/puppetdb.conf 
-[root@server2 puppet-dashboard]# echo -e " 
-[main]\n
-server = server2.com\n
-port = 8081\n" > /etc/puppet/puppetdb.conf
+[root@server2 puppet-dashboard]# echo -e "[main]\n server = server2.com\n port = 8081\n" > /etc/puppet/puppetdb.conf
 
 
 # Изменяем конф /etc/puppet/puppet.conf , продолжая вконце  директивы [master]
@@ -47,15 +47,11 @@ port = 8081\n" > /etc/puppet/puppetdb.conf
 
 # Необходимо найти - где паппет ищет  /etc/puppet/routes.yaml
 [root@server2 puppet-dashboard]# puppet master --configprint route_file
- /etc/puppet/routes.yaml
+>> /etc/puppet/routes.yaml
  
 
 # Создаем файл /etc/puppet/routes.yaml с содержимым:
-[root@server2 puppet-dashboard]# echo -e "
- master:\n
-   facts:\n
-      terminus: puppetdb\n
-      cache: yaml\n" > /etc/puppet/routes.yaml
+[root@server2 puppet-dashboard]# echo -e "master:\n facts:\n terminus: puppetdb\n cache: yaml\n" > /etc/puppet/routes.yaml
 	  
 
 # Перезапускаем сервис паппет-мастер:
@@ -64,11 +60,7 @@ port = 8081\n" > /etc/puppet/puppetdb.conf
 
 # Добавляем в вебку:
 #http://docs.puppetlabs.com/guides/inventory_service.html 
-[root@server2 puppet-dashboard]# echo -e "
-path /facts\n
-auth any\n
-method find, search\n
-allow *\n" >> /etc/puppet/auth.conf
+[root@server2 puppet-dashboard]# echo -e "path /facts\n auth any\n method find, search\n allow *\n" >> /etc/puppet/auth.conf
 
 # Необходимо обновить ваш конфиг Puppet Dashboard settings.yml (для CentOS 6 он распологается в /usr/share/puppet-dashboard/config/settings.yml).
 # Пример конфига с пояснениями описан вконце статьи.
