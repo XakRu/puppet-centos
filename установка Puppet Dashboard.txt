@@ -1,0 +1,43 @@
+############################_Установка Puppet Dashboard_############################
+####################################################################################
+# Нет необходимости устанавливать gem rails.
+# Устанавливаем puppet-dashboard, там и зависимости подцепятся:
+[root@server]# yum install -y puppet-dashboard build-essential irb libmysql-ruby libmysqlclient-dev    libopenssl-ruby libreadline-ruby mysql-server rake rdoc ri ruby ruby-devel
+
+# Обновляем гемы:
+[root@server]# gem update
+
+# Также необходимо обновить спеки гемов
+[root@server]# cd /usr/share/puppet-dashboard/
+[root@server]# rake gems:refresh_specs
+
+# Создаем таблицы в БД:
+[root@server]# rake RAILS_ENV=production db:migrate
+
+# Настраиваем подключение к БД:
+[root@server]# cd /usr/share/puppet-dashboard/config/
+[root@server]# nano database.yml 
+# (нас интересует продакшн (production))
+
+# Настраиваем дашборд если это необходимо:
+nano /etc/sysconfig/puppet-dashboard
+# На порту 80 не запускается. Рекоммендуется использовать nginx или apache
+
+# Запускаем:
+[root@server]# /etc/init.d/puppet-dashboard start
+[root@server]# chkconfig puppet-dashboard on
+
+# Перезапускаем агента:
+[root@server]# /etc/init.d/puppet restart
+# Для того, что бы он отобразился у нас в дашборде, но мы не увидим ноду, увидим Background Tasks и будто там что-то есть.
+# Что бы нода отобразилась в дашборде необходимо выполнить на ней какое-нибудь задание. 
+# Но сначала импортируем все задачи, которые она проводила.
+
+# Т.к. логи создаются от пользователя puppet,необходимо пользователя puppet-dashboard добавить в группу puppet
+[root@server]# usermod -aG puppet puppet-dashboard
+
+# Производим импорт действий нод:
+[root@server]# sudo -u puppet-dashboard rake RAILS_ENV=production reports:import
+
+# И наконец после этой комманды отображается нода в дашборде:
+[root@server]# sudo -u puppet-dashboard env RAILS_ENV=production script/delayed_job -p dashboard -n 4 -m start 

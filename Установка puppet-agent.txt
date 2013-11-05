@@ -1,0 +1,10 @@
+# Установка puppet - agent:
+[root@agent]# rpm -ihv http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
+[root@agent]# yum install puppet -y 
+
+# В блок [agent] файла /etc/puppet/puppet.conf вставить:
+# server = server2.com
+# report = true   
+[root@agent]# echo -e "server = server2.com\nreport = true\n" >> /etc/puppet/puppet.conf
+[root@agent]# /etc/init.d/puppet restart
+[root@agent]# chkconfig puppet on
