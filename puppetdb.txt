@@ -1,38 +1,46 @@
-Установка PuppetDB
-[root@server2 puppet-dashboard]# puppet resource package puppetdb ensure=latest
-Notice: /Package[puppetdb]/ensure: created
-package { 'puppetdb':
-  ensure => '1.5.2-1.el6',
-}
+# Тестирование проводится на отдельных серверах. 
+# server2.com ip: xxx.xxx.69.71
+# alone.com ip: 192.168.0.106
 
-Перед запуском необходимо отключить ipv6, иначе он конкатенирует две версии протокола в одну строку вида:
-tcp        0      0 ::ffff:127.0.0.1:8080       :::*                        LISTEN      16746/java          
-tcp        0      0 ::ffff:130.193.69.71:8081   :::*                        LISTEN      16746/java
+
+# Установка PuppetDB
+[root@server2 puppet-dashboard]# puppet resource package puppetdb ensure=latest
+>> Notice: /Package[puppetdb]/ensure: created
+>> package { 'puppetdb':
+>> ensure => '1.5.2-1.el6',
+>> }
+
+# Перед запуском необходимо отключить ipv6, иначе он конкатенирует две версии протокола в одну строку вида:
+[root@server2 puppet-dashboard]# netstat -ntlup | grep java
+>> tcp        0      0 ::ffff:127.0.0.1:8080       :::*                        LISTEN      16746/java          
+>> tcp        0      0 ::ffff:130.193.69.71:8081   :::*                        LISTEN      16746/java
 
 [root@server2 puppet-dashboard]# echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
 [root@server2 puppet-dashboard]# echo 1 > /proc/sys/net/ipv6/conf/default/disable_ipv6
-или
-sysctl -w net.ipv6.conf.all.disable_ipv6=1
-sysctl -w net.ipv6.conf.default.disable_ipv6=1
-
-service network restart
+# или
+[root@server2 puppet-dashboard]# sysctl -w net.ipv6.conf.all.disable_ipv6=1
+[root@server2 puppet-dashboard]# sysctl -w net.ipv6.conf.default.disable_ipv6=1
+[root@server2 puppet-dashboard]# sysctl -p
+[root@server2 puppet-dashboard]# service network restart
 
 # Запускаем puppetdb
 [root@server2 puppet-dashboard]# puppet resource service puppetdb ensure=running enable=true
-Notice: /Service[puppetdb]/ensure: ensure changed 'stopped' to 'running'
-service { 'puppetdb':
-  ensure => 'running',
-  enable => 'true',
-}
+>> Notice: /Service[puppetdb]/ensure: ensure changed 'stopped' to 'running'
+>> service { 'puppetdb':
+>>   ensure => 'running',
+>>   enable => 'true',
+>> }
 
-через инит не запускается puppetdb!!!!
+# через инит puppetdb не запускается (видимо кривой скрипт)!!!!
 
-Создаем конф /etc/puppet/puppetdb.conf 
-[main]
-server = server2.com
-port = 8081
+# Создаем конф /etc/puppet/puppetdb.conf 
+[root@server2 puppet-dashboard]# echo -e " 
+[main]\n
+server = server2.com\n
+port = 8081\n" > /etc/puppet/puppetdb.conf
 
-Изменяем конф /etc/puppet/puppet.conf , добавив вконце  директивы [master]
+
+# Изменяем конф /etc/puppet/puppet.conf , продолжая вконце  директивы [master]
  storeconfigs = true
  storeconfigs_backend = puppetdb
  
@@ -41,22 +49,23 @@ port = 8081
  /etc/puppet/routes.yaml
  
  
- Создаем файл /etc/puppet/routes.yaml с содержимым:
- master:
-   facts:
-      terminus: puppetdb
-      cache: yaml
-
- /etc/init.d/puppetmaster restart
+ # Создаем файл /etc/puppet/routes.yaml с содержимым:
+[root@server2 puppet-dashboard]# echo -e "
+ master:\n
+   facts:\n
+      terminus: puppetdb\n
+      cache: yaml\n" > /etc/puppet/routes.yaml
+	  
+# Перезапускаем сервис паппет-мастер:
+[root@server2 puppet-dashboard]# /etc/init.d/puppetmaster restart
  
- Добавляем в вебку:
-http://docs.puppetlabs.com/guides/inventory_service.html 
-/etc/puppet/auth.conf
-path /facts
-auth any
-method find, search
-allow *
-
+# Добавляем в вебку:
+#http://docs.puppetlabs.com/guides/inventory_service.html 
+[root@server2 puppet-dashboard]# echo -e "
+path /facts\n
+auth any\n
+method find, search\n
+allow *\n" >> /etc/puppet/auth.conf
 
 
  
