@@ -1,79 +1,277 @@
-<!DOCTYPE html>
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
 <html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Puppet-centos : Puppet Centos 6 installation" />
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+  <title>Puppet-centos</title>
+  <meta name="description" content="Puppet Centos 6 installation">
 
-    <title>Puppet-centos</title>
-  </head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <body>
+</head>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/XakRu/puppet-centos">View on GitHub</a>
+<body>
 
-          <h1 id="project_title">Puppet-centos</h1>
-          <h2 id="project_tagline">Puppet Centos 6 installation</h2>
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Puppet-centos</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">Puppet Centos 6 installation</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/XakRu/puppet-centos/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/XakRu/puppet-centos/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/XakRu/puppet-centos" class="code">View Puppet-centos on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>
+<a name="%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-puppet-%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%BE%D0%B2" class="anchor" href="#%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-puppet-%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%BE%D0%B2"><span class="octicon octicon-link"></span></a>Установка Puppet-клиентов</h1>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/XakRu/puppet-centos/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/XakRu/puppet-centos/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
+<p>1.Необходимо привести в следующий вид файл /etc/hosts:</p>
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+<pre><code>    ###############################################################################
+    127.0.0.1        agent02.com
+    192.168.0.105 agent02.com # NIC &lt;eth2&gt;
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+    #puppet-master
+    10.10.69.47        server.com
+    ###############################################################################
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>2.Первое конечно установить puppet:</p>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<pre><code>    yum install puppet -y
+</code></pre>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p>3.Затем в конф /etc/puppet/puppet.conf в секцию [agent] добавить следующие строки:</p>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<pre><code>    server = server.com
+    report = true
+</code></pre>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>4.Думаю что здесь все понятно.</p>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<h1>
+<a name="%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-puppet-server" class="anchor" href="#%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-puppet-server"><span class="octicon octicon-link"></span></a>Установка Puppet Server</h1>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>1.Необходимо привести в следующий вид файл /etc/hosts:</p>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<pre><code>    ###############################################################################
+    127.0.0.1 server.com server localhost
+    10.10.69.47 server.com # NIC &lt;eth2&gt;
+    192.168.0.101 server.com # NIC &lt;eth3&gt;
+    192.168.0.104        agent01.com
+    192.168.0.105        agent02.com
+    192.168.0.106        alone.com
+    ###############################################################################
+</code></pre>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-      </section>
+<p>2.Подключаем репозиторий puppet-labs:</p>
+
+<pre><code>    [root@server]# rpm -ihv http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
+</code></pre>
+
+<p>3.Устанавливаем пакет для сервера:</p>
+
+<pre><code>    [root@server]# yum install puppet-server readline-devel -y
+</code></pre>
+
+<p>4.Настроить на сервере /etc/hosts</p>
+
+<pre><code>    [root@server]# echo -e "[master]\nreports = store,\nhttp\nreporturl = http://localhost:3000/reports/upload\n" &gt;&gt; /etc/puppet/puppet.conf
+</code></pre>
+
+<p>5.Открыть порт 8140 на сервере.</p>
+
+<p>6.После перезапуска агента сервер уже видит его запрос.</p>
+
+<pre><code>    [root@server]# puppet cert --list --all
+</code></pre>
+
+<p>7.И можно сразу подписать ( у подписанной ноды стоит знак "+" слева ):</p>
+
+<pre><code>    [root@server]# puppet cert sign &lt;host&gt;
+    # Например &gt;puppet cert sign agent.сom
+</code></pre>
+
+<p>8.Ноды описываются на сервере в файле /etc/puppet/manifests/nodes.pp</p>
+
+<pre><code>Примерно так:
+
+    [root@server]# cat nodes.pp
+                   node 'agent01.com' {
+                            include httpd
+                        }
+
+                   node 'agent02.com' {
+                            include httpd
+                        }
+</code></pre>
+
+<p>9.Рецепты:</p>
+
+<pre><code>    [root@server]# cat /etc/puppet/manifests/site.pp
+                    class httpd {
+                                    package { 'httpd':
+                                            ensure =&gt; installed,
+                                            }
+                                    service { 'httpd':
+                                            ensure =&gt; true,
+                                            enable =&gt; true,
+                                            require =&gt; Package['httpd'],
+                                            }
+                                    }
+</code></pre>
+
+<h1>
+<a name="%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-puppet-dashboard" class="anchor" href="#%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-puppet-dashboard"><span class="octicon octicon-link"></span></a>Установка Puppet-dashboard</h1>
+
+<pre><code>    yum install puppet-dashboard
+
+    Dependencies Resolved
+
+    ===========================================================================================         Package Arch Version Repository Size
+    ===========================================================================================     Installing:
+    puppet-dashboard noarch 1.2.23-1.el6 puppetlabs-products 4.3 M
+    Installing for dependencies:
+    ruby-mysql x86_64 2.8.2-1.el6 epel 45 k
+    rubygem-rake noarch 0.8.7-2.1.el6 base 404 k
+
+    Transaction Summary
+    ===========================================================================================     Install 3 Package(s)
+
+     Total download size: 4.7 M
+     Installed size: 18 M
+</code></pre>
+
+<p>1.Установка MySQL-server</p>
+
+<pre><code>    yum install mysql-server mysql mysql-devel readline-devel -y
+    /etc/init.d/mysqld start
+    /sbin/chkconfig mysqld on
+    mysql_secure_installation
+    yum install ruby-devel
+    gem install rake mysql
+</code></pre>
+
+<p>2.Настройка подключения к БД ( puppet ) config/database.yml:</p>
+
+<pre><code>    mysql&gt;  CREATE DATABASE dashboard CHARACTER SET utf8;
+        CREATE USER 'dashboard'@'localhost' IDENTIFIED BY 'my_password';
+        GRANT ALL PRIVILEGES ON dashboard.* TO 'dashboard'@'localhost';
+        flush privileges;
+</code></pre>
+
+<p>3.Установить пераметр для MySQL:</p>
+
+<pre><code>    mysql&gt; set max_allowed_packet = 33554432;
+</code></pre>
+
+<p>или</p>
+
+<pre><code>    max_allowed_packet = 32M в /etc/my.cnf
+    service mysqld restart
+</code></pre>
+
+<p>4.Переходим в папку с pappet-dashboard где находится скирпт импорта таблиц и запускаем:</p>
+
+<pre><code>    cd /usr/share/puppet-dashboard/
+    rake gems:refresh_specs
+    rake RAILS_ENV=production db:migrate
+
+    /etc/init.d/puppet-dashboard start
+    usermod -aG puppet puppet-dashboard
+    chown -R puppet-dashboard:puppet-dashboard /usr/share/puppet-dashboard/
+    sudo -u puppet-dashboard rake RAILS_ENV=production reports:import
+</code></pre>
+
+<p>5.И наконец после этой комманды отображается нода в дашборде:</p>
+
+<pre><code>    sudo -u puppet-dashboard env RAILS_ENV=production script/delayed_job -p dashboard -n 4 -m start
+</code></pre>
+
+<p>6.Установка Apache</p>
+
+<pre><code>    yum install httpd mod_ssl httpd-devel
+    /sbin/chkconfig httpd on
+    /etc/init.d/httpd start
+</code></pre>
+
+<p>7.Установка модуля passenger для Апача</p>
+
+<pre><code>    yum install curl-devel -y
+    gem update
+    gem install passenger
+    passenger-install-apache2-module
+</code></pre>
+
+<p>8.Жмак на энтер, много-много букоф... чувствую себя хацкером :Ъ</p>
+
+<p>9.Добавляем в /etc/httpd/conf/httpd.conf ( у нас уже с руби 1.9.3 ) :</p>
+
+<pre><code>    nano /etc/httpd/conf/httpd.conf
+    LoadModule passenger_module /usr/local/rvm/gems/ruby-1.9.3-p448/gems/passenger-4.0.21/buildout/apache2/mod_passenger.so
+    PassengerRoot /usr/local/rvm/gems/ruby-1.9.3-p448/gems/passenger-4.0.21
+    PassengerDefaultRuby /usr/local/rvm/wrappers/ruby-1.9.3-p448/ruby
+</code></pre>
+
+<p>10.Виртуальный хост:</p>
+
+<pre><code>    &lt;VirtualHost *:80&gt;
+        ServerName server.com
+            # !!! Be sure to point DocumentRoot to 'public'!
+            DocumentRoot /usr/share/puppet-dashboard/public
+            &lt;Directory /usr/share/puppet-dashboard/public&gt;
+            # This relaxes Apache security settings.
+                AllowOverride all
+                # MultiViews must be turned off.
+                Options -MultiViews
+            &lt;/Directory&gt;
+    &lt;/VirtualHost&gt;
+</code></pre>
+
+<p>11.Меняем пользователя с apache на puppet-dashboard</p>
+
+<pre><code>    sed -i 's/User apache/User puppet-dashboard/g' /etc/httpd/conf/httpd.conf
+    sed -i 's/Group apache/Group puppet-dashboard/g' /etc/httpd/conf/httpd.conf
+</code></pre>
+
+<p>12.Перезагружаем сервер.</p>
+
+<pre><code>    service httpd restart
+</code></pre>
+        </article>
+      </div>
     </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/XakRu" class="avatar"><img src="https://0.gravatar.com/avatar/11e72abe28b5ef3a5b195d6809e8221f?d=https%3A%2F%2Fidenticons.github.com%2F920602c4ddb2cf5949a45e1a997083d2.png&amp;r=x&amp;s=60" width="48" height="48"/></a> <a href="https://github.com/XakRu">XakRu</a> maintains <a href="https://github.com/XakRu/puppet-centos">Puppet-centos</a></p>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Puppet-centos maintained by <a href="https://github.com/XakRu">XakRu</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
 
-    
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="http://pages.github.com/">GitHub Pages</a><br/>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/XakRu/puppet-centos/tarball/master" class="tar">tar</a><a href="https://github.com/XakRu/puppet-centos/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
 
-  </body>
+  
+</body>
 </html>
